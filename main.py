@@ -54,37 +54,53 @@ class QueryUser(webapp2.RequestHandler):
             errorhandler(self.response,'User Status files not found')
             return
 
-        stats  = []
-        errors = []
+        ## TODO move to a method ##
         pids = ''
-        template_values = {'user_name' : userid}
         success = 0
         failed  = 0
+        stats  = []
+        errors = []
+        template_values = {'user_name' : userid}
         for object in result_bunch.result:
             dom = parseString(object.obj_uri.get_contents_as_string())
-            user = getText(dom.getElementsByTagName('SourceUser')[0].childNodes)
+            user = getTopText(dom,'SourceUser')
             if user != userid:
                 pass
-            #TODO aggregate stats
+            ## Finding status ##
             pids = pids + ' ' + object.pid
             main_status = dom.getElementsByTagName('MigrationStatus')[0].getAttribute('value')
             insert_with_priority(template_values, 'main_status', main_status, config.Status_priority)
             for category in config.Migration_categories:
                 d = dom.getElementsByTagName(category + 'MigrationStatus')
+                if d == None:
+                    pass
                 key = category + '_status'
                 template_values[key] = d[0].getElementsByTagName('MigrationStatus')[0].getAttribute('value')
                 if category == 'Email':
                    bunch = process_email_stats(d[0])
                    success += bunch.success
                    failed  += bunch.failed
+                   ## Find detailed error message report ##
+                   failed_msgs = d[0].getElementsByTagName('FailedMessages')
+                   if failed_msgs == None:
+                       pass
+                   for message in failed_msgs:
+                     subject=getTopText(message, 'MessageSubject')
+                     errormsg=getTopText(message, 'ErrorMessage')
+                     senttime=getTopText(message, 'SentTime')
+                     size=getTopText(message, 'MessageSize')
+                     if subject != '':
+                         errors.append((subject, errormsg, senttime, size))
+            
+
 
         stats.append('Messages Migrated: ' + str(success))
         stats.append('Messages Failed: ' + str(failed))
         stats.append('Percentage Success: ' + str(success*100/(success+failed)))
 
-        errors.append(('Attachements too large', 'test1'))
-        errors.append(('Disallowed File Types', 'test1'))
-        errors.append(('others', 'test3'))
+        #errors.append(('Attachements too large', 'test1'))
+        #errors.append(('Disallowed File Types', 'test1'))
+        #errors.append(('others', 'test3'))
 
         template_values['email_stats']   = stats
         template_values['error_results'] = errors
@@ -123,6 +139,14 @@ def getText(nodelist):
         if node.nodeType == node.TEXT_NODE:
             rc.append(node.data)
     return ''.join(rc)
+
+def getTopText(dom, tag_name):
+    elems = dom.getElementsByTagName(tag_name)
+    if len(elems) == 0:
+        return ''
+    else:
+        return getText(elems[0].childNodes)
+    
 
 def errorhandler(handler, error):
     error_str = '<span STYLE=\"color: rgb(100%, 0%, 0%)\">' + error + '</span>'
