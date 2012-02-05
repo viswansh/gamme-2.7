@@ -1,21 +1,22 @@
 
 import os
-
-os.environ['BOTO_CONFIG'] = 'boto.cfg'
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-
 import boto
 import config
 import logging
 import re
 
-from utils import Bunch
+from helpers import Bunch
 from oauth2_plugin import oauth2_plugin
 from boto.exception import S3ResponseError
 from boto.pyami.config import Config
 
-
 def get_userobjects(user=None):
+    """
+    retrieves objects matching the pattern with
+    user. default generic case provided to return all
+    files, but not currently used in the scope of project
+    """
+
     objects   = []
     error_str = ''
     pattern   = None
@@ -39,7 +40,7 @@ def get_userobjects(user=None):
                     if m != None:
                         objects.append(Bunch(obj_uri=obj_uri, pid=m.group(2)))
                 else:
-                    #Note this case is currently not covered
+                    #Note this case is currently not used
                     objects.append(Bunch(obj_uri=obj_uri,pid=None))
     except AttributeError, e:
         error_str = 'GSCloud::get_userlist Attribute Error %s'% (e)

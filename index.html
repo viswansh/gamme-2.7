@@ -66,6 +66,7 @@
 		 <input type="submit" value="Submit" style="background-color:gray;"/>
               </div>
 	     </form>
+	   </div>
            </br></br></br>
            <div id="stats-div" style="background-color:gray">
               <label style="color:blue"> {{user_name}} </label></br>
@@ -79,15 +80,15 @@
 		{% endfor %}
               </ul>
            </div>
-              </br></br>
+           </br></br>
            <div id="errors-div" style="background-color:gray">
               <label for="user" style="font-weight:bold;">Errors Summary</label>
               <ul>
-		{% for error, link_id, table_id, error_table in error_results_new%}
+		{% for error, link_id, div_id, error_table in error_results%}
                 <li>
 		  <div>
-                    <a id={{link_id}} href="#" onclick="toggleBlock(this.id, {{table_id}})"> {{error}} </a>
-	            <div id="{{table_id}}" class="table_content">
+                    <a id={{link_id}} href="#" onclick="toggleBlock(this.id, {{div_id}}.id)"> {{error}} </a>
+	            <div id={{div_id}} class="table_content">
 		      <table class="tbclass">
 			{% for row in error_table %}
 			<tr>
@@ -103,17 +104,6 @@
 		{% endfor %}
               </ul>
            </div>
-	   <div id="error-table">
-	     <table class="tbclass">
-	       {% for row in error_resultsa %}
-	       <tr>
-		 {% for name in row %}
-		 <td>{{ name }}</td>    
-		 {% endfor %}
-	       </tr>
-	       {% endfor %}
-	     </table>
-	   </div>
          </div>
        </body>
 </html>
