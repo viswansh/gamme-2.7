@@ -8,8 +8,8 @@ import boto
 import config
 import logging
 import re
-import utils
 
+from utils import Bunch
 from oauth2_plugin import oauth2_plugin
 from boto.exception import S3ResponseError
 from boto.pyami.config import Config
@@ -20,7 +20,6 @@ def get_userobjects(user=None):
     error_str = ''
     pattern   = None
     if user != None:
-        #pattern=r'Status-' + filter + '-(.*)-p(.*).log'
         pattern=config.Status_log_pattern%(user)
     else:
         pattern=None
@@ -36,11 +35,12 @@ def get_userobjects(user=None):
             uri = boto.storage_uri(bucket, config.Google_storage)
             for obj_uri in uri.get_bucket():
                 if pattern != None:
-                    if re.match(pattern, obj_uri.name) != None:
-                        #objects.append('/%s/%s/%s' % (uri.scheme, uri.bucket_name, obj_uri.name))
-                        objects.append(obj_uri)
+                    m = re.match(pattern, obj_uri.name)
+                    if m != None:
+                        objects.append(Bunch(obj_uri=obj_uri, pid=m.group(2)))
                 else:
-                    objects.append(obj_uri)
+                    #Note this case is currently not covered
+                    objects.append(Bunch(obj_uri=obj_uri,pid=None))
     except AttributeError, e:
         error_str = 'GSCloud::get_userlist Attribute Error %s'% (e)
         logging.error(error_str)
@@ -48,5 +48,5 @@ def get_userobjects(user=None):
         error_str = 'GSCloud::get_userlist Response Error status=%d,code=%s, reason=%s.</b>' % (e.status, e.code, e.reason)
         logging.error(error_str)
 
-    return utils.Bunch(result=objects,
-                       error=error_str)
+    return Bunch(result=objects,
+                 error=error_str)

@@ -23,10 +23,10 @@
 		 <input type="submit" value="Submit" style="background-color:gray;"/>
               </div>
 	     </form>
-           <div id="stats-div">
-              </br></br></br></br></br>
-              <label for="user" style="font-weight:bold;"> Migration Status: {{main_status}} for 
-		<span style="color:blue"> {{user_name}} </span></label>
+           </br></br></br>
+           <div id="stats-div" style="background-color:gray">
+              <label style="color:blue"> {{user_name}} </label></br>
+              <label for="user" style="font-weight:bold;"> Migration Status: {{main_status}} - {{pids}} </label>
               <ul>
                 <li>Calendar : {{Calendar_status}}</li>
                 <li>Contacts : {{Contact_status }}</li>
@@ -36,8 +36,8 @@
 		{% endfor %}
               </ul>
            </div>
-           <div>
               </br></br>
+           <div id="errors-div" style="background-color:gray">
               <label for="user" style="font-weight:bold;">Errors Summary</label>
               <ul>
 		{% for error, link in error_results%}

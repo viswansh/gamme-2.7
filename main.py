@@ -56,17 +56,19 @@ class QueryUser(webapp2.RequestHandler):
 
         stats  = []
         errors = []
+        pids = ''
         template_values = {'user_name' : userid}
         success = 0
         failed  = 0
-        for obj_uri in result_bunch.result:
-            dom = parseString(obj_uri.get_contents_as_string())
+        for object in result_bunch.result:
+            dom = parseString(object.obj_uri.get_contents_as_string())
             user = getText(dom.getElementsByTagName('SourceUser')[0].childNodes)
             if user != userid:
                 pass
             #TODO aggregate stats
+            pids = pids + ' ' + object.pid
             main_status = dom.getElementsByTagName('MigrationStatus')[0].getAttribute('value')
-            template_values['main_status'] = main_status
+            insert_with_priority(template_values, 'main_status', main_status, config.Status_priority)
             for category in config.Migration_categories:
                 d = dom.getElementsByTagName(category + 'MigrationStatus')
                 key = category + '_status'
@@ -78,14 +80,15 @@ class QueryUser(webapp2.RequestHandler):
 
         stats.append('Messages Migrated: ' + str(success))
         stats.append('Messages Failed: ' + str(failed))
-        stats.append('Percentage Success: ' + str(float((success)/(success+failed))))
+        stats.append('Percentage Success: ' + str(success*100/(success+failed)))
 
-            errors.append(('Attachements too large', 'test1'))
-            errors.append(('Disallowed File Types', 'test1'))
-            errors.append(('others', 'test3'))
+        errors.append(('Attachements too large', 'test1'))
+        errors.append(('Disallowed File Types', 'test1'))
+        errors.append(('others', 'test3'))
 
-            template_values['email_stats']   = stats
-            template_values['error_results'] = errors
+        template_values['email_stats']   = stats
+        template_values['error_results'] = errors
+        template_values['pids'] = pids
 
         template = jinja_environment.get_template('index.html')
         self.response.out.write(template.render(template_values))
@@ -94,6 +97,16 @@ class QueryUser(webapp2.RequestHandler):
 ## app is thread safe, so all the requests are serialized
 ## so its, safe to assume the result is always the latest
 #class ErrorResultHandler():
+
+#highest priority is index 0 
+#if the new value has higher priority then insert else discard
+def insert_with_priority(dict, key, val, priority_list):
+    if key not in dict:
+        dict[key] = val
+    else:
+        if priority_list.index(dict[key]) > priority_list.index(val):
+            dict[key] = val
+    
 
 def process_email_stats(dom):
     success = 0
