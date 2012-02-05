@@ -36,17 +36,17 @@ def get_userobjects(filter=None):
             for obj_uri in uri.get_bucket():
                 if pattern != None:
                     if re.match(pattern, obj_uri.name) != None:
-                        objects.append('%s://%s/%s' % (uri.scheme, uri.bucket_name, obj_uri.name))
+                        #objects.append('/%s/%s/%s' % (uri.scheme, uri.bucket_name, obj_uri.name))
+                        objects.append(obj_uri)
                 else:
-                    objects.append('%s://%s/%s' % (uri.scheme, uri.bucket_name, obj_uri.name))
+                    #objects.append('/%s/%s/%s' % (uri.scheme, uri.bucket_name, obj_uri.name))
+                    objects.append(obj_uri)
     except AttributeError, e:
-        objects = None
         error_str = 'GSCloud::get_userlist Attribute Error %s'% (e)
         logging.error(error_str)
     except S3ResponseError, e:
-        objects = None
         error_str = 'GSCloud::get_userlist Response Error status=%d,code=%s, reason=%s.</b>' % (e.status, e.code, e.reason)
         logging.error(error_str)
 
-    return utils.Bunch(result=objects, 
+    return utils.Bunch(result=objects,
                        error=error_str)

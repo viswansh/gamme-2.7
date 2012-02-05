@@ -7,31 +7,31 @@
 	</head>
 
 	<body>
-		<script type="text/javascript">
-		</script>
+	  <script type="text/javascript">
+	  </script>
 
-		<div>
+	  <div>
             <h2> Migration Status Viewer </h2>
-		</div>
+	  </div>
 
-		<div id="searchForm">
-		  <form action="/queryuser" method="get">
-		     <div>
-			    <label for="user" style="font-weight:bold;"> Enter UniqueId: </label> </br></br>
-			    <input id="userid" type="text" value={{ user_text }}/>
-		        <input type="submit" value="Submit"
-                       style="background-color:gray;"/>
-		     </div>
-		  </form>
-		  <form action="/cloudaccess" method="get">
-		     <div>
-		        <input type="submit" value="access cloud"
-                       style="background-color:gray;"/>
-		     </div>
-		  </form>
-		</div>
-
-        <div id="results">
-        </div>
-	</body>
+	  <div id="searchForm">
+	    <form action="/queryuser" method="get">
+	      <div>
+		<label for="user" style="font-weight:bold;"> Enter UniqueId: </label> 
+                <label for="errorlbl" style="font-weight:bold;padding-left: 5em;"> {{error_str}} </label> </br>
+	         <input type="text" name="userid"/>
+		 <input type="submit" value="Submit" style="background-color:gray;"/>
+              </div>
+	     </form>
+           <div>
+              </br></br></br></br></br>
+              <label for="user" style="font-weight:bold;"> Migration User {{user_name}}</label> 
+              <ul>
+		{% for row in results %}
+                <li class="{{ loop.cycle('odd', 'even') }}">{{ row }}</li>
+		{% endfor %}
+              </ul>
+           </div>
+         </div>
+       </body>
 </html>
