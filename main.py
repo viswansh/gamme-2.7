@@ -69,7 +69,6 @@ class GammeParserHelper():
         success = 0
         failed  = 0
         for folders in dom.getElementsByTagName('FolderList'):
-            logging.error('processing folder %s', str(folders))
             success += int(folders.getElementsByTagName('SuccessCount')[0].getAttribute('value'))
             failed += int(folders.getElementsByTagName('FailCount')[0].getAttribute('value'))
         return Bunch(success=success, failed=failed)
