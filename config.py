@@ -12,8 +12,10 @@ Status_priority = ['Failed', 'In Progress', 'Completed']
 Status_log_pattern='Status-%s-(.*)-p(.*).log'
 
 Migration_categories = ['Calendar', 'Contact', 'Email']
+
 Attachment_large_pattern='Mail too large(.*)80041066(.*)'
 Disallowed_file_type_pattern='GDSTATUS_BAD_REQUEST:Permanent failure(.*)'
+## error pattern -> category mapping
 Error_categories = {Attachment_large_pattern : 'Attachments too large',
                     Disallowed_file_type_pattern: 'Disallowd file types'}
 

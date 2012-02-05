@@ -8,9 +8,25 @@
 
 	<body>
 	  <script type="text/javascript">
+	    function toggleBlock(link_id,elemId) 
+	    {
+	      var linkObj = document.getElementById(link_id);
+	      var contObj = document.getElementById(elemId);
+	      var status = (contObj.style.display == 'table')? 'none' : 'table';
+	      //display/hide the more content for this elemId
+	      contObj.style.display=status;
+	    } 
 	  </script>
 
 	  <style type="text/css">
+	    .table_content
+	    {
+	    margin: 10px 0px 0px 50px;
+	    padding: 5px 5px 5px 5px;
+	    border: 0px solid black;
+	    overflow: auto;
+	    display: none
+	    }
 	    table.tbclass {
 	    border-width: 1px;
 	    border-spacing: 1px;
@@ -67,16 +83,29 @@
            <div id="errors-div" style="background-color:gray">
               <label for="user" style="font-weight:bold;">Errors Summary</label>
               <ul>
-		{% for error, link in error_resultsaa%}
-                <li class="{{ loop.cycle('odd', 'even') }}">
-                    {{ error }} <a href="{{link}}"> 10 </a>
+		{% for error, link_id, table_id, error_table in error_results_new%}
+                <li>
+		  <div>
+                    <a id={{link_id}} href="#" onclick="toggleBlock(this.id, {{table_id}})"> {{error}} </a>
+	            <div id="{{table_id}}" class="table_content">
+		      <table class="tbclass">
+			{% for row in error_table %}
+			<tr>
+			  {% for name in row %}
+			  <td>{{ name }}</td>    
+			  {% endfor %}
+			</tr>
+			{% endfor %}
+		      </table>
+		    </div>
+		  </div>
                 </li>
 		{% endfor %}
               </ul>
            </div>
 	   <div id="error-table">
 	     <table class="tbclass">
-	       {% for row in error_results %}
+	       {% for row in error_resultsa %}
 	       <tr>
 		 {% for name in row %}
 		 <td>{{ name }}</td>    

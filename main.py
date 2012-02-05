@@ -15,6 +15,8 @@ import cgi
 import config
 import gscloud
 import jinja2
+import logging
+import re
 import webapp2
 import StringIO
 import urllib
@@ -60,6 +62,7 @@ class QueryUser(webapp2.RequestHandler):
         failed  = 0
         stats  = []
         errors = []
+        errors_dict = {}
         template_values = {'user_name' : userid}
         for object in result_bunch.result:
             dom = parseString(object.obj_uri.get_contents_as_string())
@@ -90,9 +93,31 @@ class QueryUser(webapp2.RequestHandler):
                      senttime=getTopText(message, 'SentTime')
                      size=getTopText(message, 'MessageSize')
                      if subject != '':
-                         errors.append((subject, errormsg, senttime, size))
-            
+                         matched = False
+                         tuple = (subject, errormsg, senttime, size)
+                         for error_pattern in config.Error_categories:
+                             if re.match(error_pattern, errormsg):
+                                 error_cat = config.Error_categories[error_pattern]
+                                 if error_cat in errors_dict:
+                                     errors_dict[error_cat].append(tuple)
+                                 else:
+                                     errors_dict[error_cat] = [tuple]
+                                 matched = True
+                                 break;
+                         if matched == False:
+                             error_cat = 'Other failed messages'
+                             if error_cat in errors_dict:
+                                 errors_dict[error_cat].append(tuple)
+                             else:
+                                 errors_dict[error_cat] = [tuple]
+                         errors.append(tuple)
 
+        i = 1
+        errors_new = []
+        for key in errors_dict:
+            errors_new.append((key, 'link_' + str(i), 'table_' + str(i), errors_dict[key])) 
+            i += 1
+            logging.error('error %s -> %s' % (key, str(errors_dict[key])))
 
         stats.append('Messages Migrated: ' + str(success))
         stats.append('Messages Failed: ' + str(failed))
@@ -104,17 +129,14 @@ class QueryUser(webapp2.RequestHandler):
 
         template_values['email_stats']   = stats
         template_values['error_results'] = errors
+        template_values['error_results_new'] = errors_new
         template_values['pids'] = pids
 
         template = jinja_environment.get_template('index.html')
         self.response.out.write(template.render(template_values))
 
 
-## app is thread safe, so all the requests are serialized
-## so its, safe to assume the result is always the latest
-#class ErrorResultHandler():
-
-#highest priority is index 0 
+#highest priority is index 0
 #if the new value has higher priority then insert else discard
 def insert_with_priority(dict, key, val, priority_list):
     if key not in dict:
@@ -122,7 +144,6 @@ def insert_with_priority(dict, key, val, priority_list):
     else:
         if priority_list.index(dict[key]) > priority_list.index(val):
             dict[key] = val
-    
 
 def process_email_stats(dom):
     success = 0
@@ -132,7 +153,7 @@ def process_email_stats(dom):
        failed += int(folders.getElementsByTagName('FailCount')[0].getAttribute('value'))
 
     return utils.Bunch(success=success, failed=failed)
-        
+
 def getText(nodelist):
     rc = []
     for node in nodelist:
@@ -146,7 +167,6 @@ def getTopText(dom, tag_name):
         return ''
     else:
         return getText(elems[0].childNodes)
-    
 
 def errorhandler(handler, error):
     error_str = '<span STYLE=\"color: rgb(100%, 0%, 0%)\">' + error + '</span>'
