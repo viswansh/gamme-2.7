@@ -69,6 +69,7 @@ class GammeParserHelper():
         success = 0
         failed  = 0
         for folders in dom.getElementsByTagName('FolderList'):
+            logging.error('processing folder %s', str(folders))
             success += int(folders.getElementsByTagName('SuccessCount')[0].getAttribute('value'))
             failed += int(folders.getElementsByTagName('FailCount')[0].getAttribute('value'))
         return Bunch(success=success, failed=failed)
@@ -172,7 +173,11 @@ class QueryUser(webapp2.RequestHandler):
 
         stats.append('Messages Migrated: ' + str(success))
         stats.append('Messages Failed: ' + str(failed))
-        stats.append('Percentage Success: ' + str(success*100/(success+failed)))
+        try:
+            stats.append('Percentage Success: ' + str(success*100/(success+failed)))
+        except ZeroDivisionError:
+            stats.append('Percentage Success: -')
+
 
         """ template values used by jijna2 to render index.html"""
         template_values['user_name']  = userid
