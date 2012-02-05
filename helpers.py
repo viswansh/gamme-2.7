@@ -1,5 +1,8 @@
 
-
+"""
+small utility class to reference  
+elements using . notation
+"""
 class Bunch(object):
     def __init__(self, **kwds):
         self.__dict__ = kwds
@@ -12,7 +15,7 @@ class Bunch(object):
             return self.__dict__[key]
         return None
 
-
+"""returns data for all node types == TEXT_NODE"""
 def getText(nodelist):
     rc = []
     for node in nodelist:
@@ -20,6 +23,7 @@ def getText(nodelist):
             rc.append(node.data)
     return ''.join(rc)
 
+"""returns the attribute of the first node match tag_name"""
 def getTopAttribute(dom, tag_name, attribute_name):
     elems = dom.getElementsByTagName(tag_name)
     if len(elems) == 0:
@@ -27,6 +31,7 @@ def getTopAttribute(dom, tag_name, attribute_name):
     else:
         return elems[0].getAttribute(attribute_name)
 
+"""returns text of the first node matching tab_name"""
 def getTopText(dom, tag_name):
     elems = dom.getElementsByTagName(tag_name)
     if len(elems) == 0:
