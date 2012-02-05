@@ -35,7 +35,8 @@ jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.di
 
 def errorhandler(handler, error):
     error_str = '<span STYLE=\"color: rgb(100%, 0%, 0%)\">' + error + '</span>'
-    template_values = { 'error_str' : error_str}
+    template_values = { 'error_str' : error_str, 
+                        'buckets' : config.Buckets}
     template = jinja_environment.get_template('index.html')
     handler.out.write(template.render(template_values))
 
@@ -78,7 +79,9 @@ class MainPage(webapp2.RequestHandler):
     """
     def get(self):
         user_id = " "
-        template_values = { 'user_text' : user_id }
+        config.Buckets = gscloud.get_buckets()
+        template_values = { 'user_text' : user_id,
+                            'buckets' : config.Buckets}
         template = jinja_environment.get_template('index.html')
         self.response.out.write(template.render(template_values))
 
@@ -90,6 +93,7 @@ class QueryUser(webapp2.RequestHandler):
     """
     def get(self):
         userid = self.request.get('userid')
+        selected_bucket = self.request.get('buckets')
         
         #  Sanity checks #
         """ Testing for empty user string """
@@ -98,7 +102,12 @@ class QueryUser(webapp2.RequestHandler):
             return
         
         """ Testing for valid results """
-        result_bunch = gscloud.get_userobjects(userid)
+        logging.debug('selected bucket=%s', selected_bucket)
+        buckets = []
+        if selected_bucket.strip() != '':
+            buckets = [selected_bucket]
+
+        result_bunch = gscloud.get_userobjects(userid, buckets)
         if len(result_bunch.result) == 0:
             errorhandler(self.response,'User Status files not found')
             return
@@ -108,7 +117,7 @@ class QueryUser(webapp2.RequestHandler):
         failed  = 0
         stats   = []
         errors_dict = {}
-        template_values = {}
+        template_values = {'buckets': config.Buckets, 'selectedBucket' : selected_bucket}
         gamma_helper = GammeParserHelper()
         for object in result_bunch.result:
             dom = parseString(object.obj_uri.get_contents_as_string())
@@ -149,7 +158,7 @@ class QueryUser(webapp2.RequestHandler):
         i = 1
         errors_results = []
         for key in errors_dict:
-            uri_link = key + ' (' + str(len(errors_dict[key])) +')'
+            uri_link = key + ' (' + str(len(errors_dict[key])-1) +')'
             errors_results.append((uri_link, 'link_' + str(i), 'div_' + str(i), errors_dict[key])) 
             i += 1
         

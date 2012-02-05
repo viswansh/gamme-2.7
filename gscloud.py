@@ -10,13 +10,19 @@ from oauth2_plugin import oauth2_plugin
 from boto.exception import S3ResponseError
 from boto.pyami.config import Config
 
-def get_userobjects(user=None):
+def get_buckets():
+    uri     = boto.storage_uri('', config.Google_storage)
+    buckets = [bucket.name for bucket in uri.get_all_buckets()]
+    logging.debug('buckets %s' % (str(buckets)))
+    return buckets
+    
+def get_userobjects(user=None, buckets=[]):
     """
     retrieves objects matching the pattern with
     user. default generic case provided to return all
     files, but not currently used in the scope of project
     """
-
+    logging.debug('get userobject bucket=%s user=%s %d' %(str(buckets), str(user), len(buckets))) 
     objects   = []
     error_str = ''
     pattern   = None
@@ -26,11 +32,10 @@ def get_userobjects(user=None):
         pattern=None
     try:
         ## get all the buckets under the storage with the given key id ##
-        if len(config.Buckets) == 0:
+        if len(buckets) == 0:
+            logging.debug('querying all buckets')
             uri     = boto.storage_uri('', config.Google_storage)
             buckets = [bucket.name for bucket in uri.get_all_buckets()]
-        else:
-            buckets = config.Buckets
         ## list of objects ##
         for bucket in buckets:
             uri = boto.storage_uri(bucket, config.Google_storage)

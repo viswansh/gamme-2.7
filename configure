@@ -1,0 +1,19 @@
+#!/bin/bash
+
+boto_config='boto.cfg'
+boto_config_bak='boto.cfg.bak'
+echo "Please enter, Google Storage access key: "
+read gs_access_key
+echo "Please enter, Google Storage access secret key: "
+read gs_access_secret_key
+
+if [ -f $boto_config ]; then
+    echo "backing up boto config"
+    `cp $boto_config $boto_config_bak`
+fi    
+
+echo "[Credentials]" > $boto_config
+echo "gs_access_key_id=$gs_access_key" >> $boto_config
+echo "gs_secret_access_key=$gs_access_secret_key" >> $boto_config
+
+echo "config created"

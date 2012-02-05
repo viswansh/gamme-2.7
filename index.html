@@ -22,7 +22,7 @@
 	    .table_content
 	    {
 	    margin: 10px 0px 0px 50px;
-	    padding: 5px 5px 5px 5px;
+	    padding: 2px 2px 2px 2px;
 	    border: 0px solid black;
 	    overflow: auto;
 	    display: none
@@ -64,13 +64,26 @@
                 <label for="errorlbl" style="font-weight:bold;padding-left: 5em;"> {{error_str}} </label> </br>
 	         <input type="text" name="userid"/>
 		 <input type="submit" value="Submit" style="background-color:gray;"/>
+		 <select name="buckets">
+		   <option value=""/>
+		   {% for bucket in buckets %}
+		     {% if bucket == selectedBucket %}
+		       <option value={{bucket}} selected="selected">{{bucket}}</option>
+		     {% else %}
+		       <option value={{bucket}}>{{bucket}}</option>
+		     {% endif %}
+		   {% endfor %}
+		 </select>
+		 <span> <--  buckets </span>
               </div>
 	     </form>
 	   </div>
            </br></br></br>
-           <div id="stats-div" style="background-color:gray">
-              <label style="color:blue"> {{user_name}} </label></br>
-              <label for="user" style="font-weight:bold;"> Migration Status: {{main_status}} - {{pids}} </label>
+           <div id="stats-div" style="background-color:#B2B2B2">
+              <label for="user" style="font-weight:bold;"> Migration Status for  
+		<cspan style="color:blue"> {{user_name}}: </cspan> 
+		{{main_status}} - {{pids}} 
+	      </label>
               <ul>
                 <li>Calendar : {{Calendar_status}}</li>
                 <li>Contacts : {{Contact_status }}</li>
@@ -80,8 +93,8 @@
 		{% endfor %}
               </ul>
            </div>
-           </br></br>
-           <div id="errors-div" style="background-color:gray">
+           </br>
+           <div id="errors-div" style="background-color:#B2B2B2">
               <label for="user" style="font-weight:bold;">Errors Summary</label>
               <ul>
 		{% for error, link_id, div_id, error_table in error_results%}
