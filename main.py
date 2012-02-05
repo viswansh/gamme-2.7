@@ -18,6 +18,7 @@ import jinja2
 import webapp2
 import StringIO
 import urllib
+import utils
 
 from oauth2_plugin import oauth2_plugin
 from boto.exception import S3ResponseError
@@ -53,23 +54,55 @@ class QueryUser(webapp2.RequestHandler):
             errorhandler(self.response,'User Status files not found')
             return
 
-        results = []
+        stats  = []
+        errors = []
+        template_values = {'user_name' : userid}
+        success = 0
+        failed  = 0
         for obj_uri in result_bunch.result:
             dom = parseString(obj_uri.get_contents_as_string())
             user = getText(dom.getElementsByTagName('SourceUser')[0].childNodes)
             if user != userid:
                 pass
+            #TODO aggregate stats
             main_status = dom.getElementsByTagName('MigrationStatus')[0].getAttribute('value')
-            results.append('Migration Status: ' + main_status)
-            results.append('Messages Migrated: ' + '677')
-            results.append('Percentag Success: ' + '98')
+            template_values['main_status'] = main_status
+            for category in config.Migration_categories:
+                d = dom.getElementsByTagName(category + 'MigrationStatus')
+                key = category + '_status'
+                template_values[key] = d[0].getElementsByTagName('MigrationStatus')[0].getAttribute('value')
+                if category == 'Email':
+                   bunch = process_email_stats(d[0])
+                   success += bunch.success
+                   failed  += bunch.failed
 
-        template_values = {'user_name' : user,
-                           'results' : results}
-            
+        stats.append('Messages Migrated: ' + str(success))
+        stats.append('Messages Failed: ' + str(failed))
+        stats.append('Percentage Success: ' + str(float((success)/(success+failed))))
+
+            errors.append(('Attachements too large', 'test1'))
+            errors.append(('Disallowed File Types', 'test1'))
+            errors.append(('others', 'test3'))
+
+            template_values['email_stats']   = stats
+            template_values['error_results'] = errors
+
         template = jinja_environment.get_template('index.html')
         self.response.out.write(template.render(template_values))
 
+
+## app is thread safe, so all the requests are serialized
+## so its, safe to assume the result is always the latest
+#class ErrorResultHandler():
+
+def process_email_stats(dom):
+    success = 0
+    failed  = 0
+    for folders in dom.getElementsByTagName('FolderList'):
+       success += int(folders.getElementsByTagName('SuccessCount')[0].getAttribute('value'))
+       failed += int(folders.getElementsByTagName('FailCount')[0].getAttribute('value'))
+
+    return utils.Bunch(success=success, failed=failed)
         
 def getText(nodelist):
     rc = []
@@ -84,17 +117,6 @@ def errorhandler(handler, error):
     template = jinja_environment.get_template('index.html')
     handler.out.write(template.render(template_values))
 
-class CloudAccess(webapp2.RequestHandler):
-    def get(self):
-        result_bunch = gscloud.get_userobjects('craftd')
-        if result_bunch.result != None:
-            self.response.out.write('<body>' + str(result_bunch.result) + '</body>')
-        else:
-            self.response.out.write('<body>' + str(result_bunch.error) + '</body>')
-
-
-
 app = webapp2.WSGIApplication([('/', MainPage),
-                               ('/queryuser',   QueryUser),
-                               ('/cloudaccess', CloudAccess)],
+                               ('/queryuser',   QueryUser)],
                                 debug=True)

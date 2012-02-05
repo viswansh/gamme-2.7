@@ -15,31 +15,31 @@ from boto.exception import S3ResponseError
 from boto.pyami.config import Config
 
 
-def get_userobjects(filter=None):
+def get_userobjects(user=None):
     objects   = []
     error_str = ''
     pattern   = None
-    if filter != None:
-        pattern=r'Status-' + filter + '-(.*)-p(.*).log'
+    if user != None:
+        #pattern=r'Status-' + filter + '-(.*)-p(.*).log'
+        pattern=config.Status_log_pattern%(user)
     else:
         pattern=None
     try:
         ## get all the buckets under the storage with the given key id ##
-        if len(config.BUCKETS) == 0:
-            uri     = boto.storage_uri('', config.GOOGLE_STORAGE)
+        if len(config.Buckets) == 0:
+            uri     = boto.storage_uri('', config.Google_storage)
             buckets = [bucket.name for bucket in uri.get_all_buckets()]
         else:
-            buckets = config.BUCKETS
+            buckets = config.Buckets
         ## list of objects ##
         for bucket in buckets:
-            uri = boto.storage_uri(bucket, config.GOOGLE_STORAGE)
+            uri = boto.storage_uri(bucket, config.Google_storage)
             for obj_uri in uri.get_bucket():
                 if pattern != None:
                     if re.match(pattern, obj_uri.name) != None:
                         #objects.append('/%s/%s/%s' % (uri.scheme, uri.bucket_name, obj_uri.name))
                         objects.append(obj_uri)
                 else:
-                    #objects.append('/%s/%s/%s' % (uri.scheme, uri.bucket_name, obj_uri.name))
                     objects.append(obj_uri)
     except AttributeError, e:
         error_str = 'GSCloud::get_userlist Attribute Error %s'% (e)

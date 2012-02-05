@@ -14,21 +14,36 @@
             <h2> Migration Status Viewer </h2>
 	  </div>
 
-	  <div id="searchForm">
+	  <div id="searchForm-div">
 	    <form action="/queryuser" method="get">
 	      <div>
-		<label for="user" style="font-weight:bold;"> Enter UniqueId: </label> 
+		<label for="user" style="font-weight:bold;"> Enter UniqueId: </label>
                 <label for="errorlbl" style="font-weight:bold;padding-left: 5em;"> {{error_str}} </label> </br>
 	         <input type="text" name="userid"/>
 		 <input type="submit" value="Submit" style="background-color:gray;"/>
               </div>
 	     </form>
-           <div>
+           <div id="stats-div">
               </br></br></br></br></br>
-              <label for="user" style="font-weight:bold;"> Migration User {{user_name}}</label> 
+              <label for="user" style="font-weight:bold;"> Migration Status: {{main_status}} for 
+		<span style="color:blue"> {{user_name}} </span></label>
               <ul>
-		{% for row in results %}
-                <li class="{{ loop.cycle('odd', 'even') }}">{{ row }}</li>
+                <li>Calendar : {{Calendar_status}}</li>
+                <li>Contacts : {{Contact_status }}</li>
+                <li>Email    : {{Email_status }}</li></br>
+		{% for row in email_stats %}
+                <span style="padding-left: 2em;">{{ row }}</span></br>
+		{% endfor %}
+              </ul>
+           </div>
+           <div>
+              </br></br>
+              <label for="user" style="font-weight:bold;">Errors Summary</label>
+              <ul>
+		{% for error, link in error_results%}
+                <li class="{{ loop.cycle('odd', 'even') }}">
+                    {{ error }} <a href="{{link}}"> 10 </a>
+                </li>
 		{% endfor %}
               </ul>
            </div>

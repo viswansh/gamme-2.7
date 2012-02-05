@@ -2,7 +2,14 @@
 pyVersion 2.7
 """
 
-GOOGLE_STORAGE='gs'
-BUCKETS = []
-#BUCKETS  = ['gamme-cs-bucket']
-#x-goog-project-id  = '203309124148'
+Google_storage='gs'
+Buckets = []
+
+##just in case there are multiple runs
+##aggregation follows below priority for status
+Status_priority = ['Failed', 'In Progress', 'Completed']
+Status_log_pattern='Status-%s-(.*)-p(.*).log'
+
+Migration_categories = ['Calendar', 'Contact', 'Email']
+
+
