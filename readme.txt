@@ -20,3 +20,7 @@ https://developers.google.com/storage/docs/gsutil
 
 Note:- Don't use boto provided by gsutil, as it has a conflict with HTTPSConnection 
        class provided by google appengine. This is resolved in the above release
+
+UnitTests
+=========
+run 'python tests_gamme.py'
