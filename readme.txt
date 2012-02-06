@@ -4,6 +4,21 @@ setup
 1. please run ./configure to setup the configuration for project
    this is a simple script prompting for your google storage access key
 
+deploy/run
+==========
+locally:-
+    dev_appserver.py gamme-2.7 -p <port>
+
+remote appengine:-
+
+    update-config:-
+        change app.yaml and update 
+        application:  <app-id>
+
+    deploy:-
+        appcfg.py updaste gamme-2.7
+    
+
 limitations
 ===========
 1. As per the google limitation on cloud storage, files greater than 32 MB
