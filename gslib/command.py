@@ -490,7 +490,7 @@ class Command(object):
       # Wait for all spawned OS processes to finish.
       for p in procs:
         p.join()
-      # If tracking bytes processed, update the master process' count from 
+      # If tracking bytes processed, update the main process' count from 
       # the global counter. 
       if hasattr(self, 'total_bytes_transferred'):
         self.total_bytes_transferred = byte_count.value
